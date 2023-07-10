@@ -12,9 +12,10 @@ fi
 
 load_wait_time=4
 save_wait_time=8
+dialog_wait_time=2
 scriptname="$(basename "$0")"
 destination="."
-browser="google-chrome"
+browser="firefox"
 suffix=""
 url=""
 
@@ -28,6 +29,7 @@ function print_usage() {
     printf "  -b, --browser          Browser executable to be used (must be one of 'google-chrome', 'chromium-browser' or 'firefox'). Default = '%s'.\n" "${browser}" >&2
     printf "  --load-wait-time       Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = %s\n" "${load_wait_time}" >&2
     printf "  --save-wait-time       Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = %s\n" "${save_wait_time}" >&2
+    printf "  --dialog-wait-time     Number of seconds to wait for save dialog. Default = %s\n" "${dialog_wait_time}" >&2
     printf "  -h, --help             Display this help message and exit.\n" >&2
 }
 
@@ -58,6 +60,11 @@ do
         --save-wait-time)
             shift;
             save_wait_time="$1"
+            shift
+            ;;
+        --dialog-wait-time)
+            shift;
+            dialog_wait_time="$1"
             shift
             ;;
         -h | --help)
@@ -150,21 +157,12 @@ fi
 # Activate the ${browser} window, and "press" ctrl+s
 xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+s"
 
-sleep 1 # Give 'Save as' dialog box time to show up
+sleep $dialog_wait_time # Give 'Save as' dialog box time to show up
 
-# Resolve the expected title name for save file dialog box (chrome & firefox differ in this regard)
-if [[ "${browser}" == "firefox" ]]; then
-    savefile_dialog_title="Save as"
-else
-    savefile_dialog_title="Save file"
-fi
-# Find window id for the "Save file" dialog box
-savefile_wid="$(xdotool search --name "$savefile_dialog_title" | head -n 1)"
-if [[ ! "${savefile_wid}" =~ ${wid_re}  ]]; then
-    printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
-    exit 1
-fi
+# Old method required using the new save file window , but newer browsers do
+# not create one
 
+savefile_wid="${browser_wid}"
 # Fix for Issue #1: Explicitly focus on the "name" field (works on both: gnome, and kde)
 xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifier "Alt+n"
 
@@ -223,10 +221,6 @@ printf "INFO: Saving web page ...\n" >&2
 # Wait for the file to be completely saved
 sleep ${save_wait_time}
 
-# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
-if [[ "${is_kde}" -eq 1 ]]; then
-    xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
-else
-    xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4"
-fi
+xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4" || true
+xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w" || true
 printf "INFO: Done!\n">&2

@@ -1,5 +1,14 @@
-automate-save-page-as
-=====================
+# save_page_as
+
+This repository contains code originally developed
+[here](https://github.com/abiyani/automate-save-page-as).
+
+I introduced minimal changes that allows it to work with newer browsers.
+
+1. Newer browser does not start a new window for file save operations.
+2. `xdotool` always sends `Ctrl+F4` and `Ctrl+w`, to kill browser.
+3. Also new variable dialog_wait_time with option `--dialog-wait-time` was introduced.
+4. Firefox is now default browser ;).
 
 *A quick hack for when `wget` doesn't cut it.*
 
@@ -7,7 +16,12 @@ automate-save-page-as
 
 ![Demo](demo.gif)
 
-This small bash script *simulates* a sequence of key presses which opens a given url in the browser, save the page (Ctrl+S), and close the browser tab/window (Ctrl+F4). Chained together, these operations allow you to use the "Save Page As" (Ctrl+S) programtically (currently you can use either of `google-chrome`, `chromium-browser` or `firefox`, and it's fairly straight forward to add support for your favorite browser).
+This small bash script *simulates* a sequence of key presses which opens a
+given url in the browser, save the page (Ctrl+S), and close the browser
+tab/window (Ctrl+F4). Chained together, these operations allow you to use the
+"Save Page As" (Ctrl+S) programtically (currently you can use either of
+`google-chrome`, `chromium-browser` or `firefox`, and it's fairly straight
+forward to add support for your favorite browser).
 
 
 
@@ -44,8 +58,9 @@ options:
   -h, --help             Display this help message and exit.
 ```
 
-The script needs `xdotool` installed (http://www.semicomplete.com/projects/xdotool/): `sudo apt-get install xdotool` (for Ubuntu).
+The script needs `xdotool` installed (http://www.semicomplete.com/projects/xdotool/):
 
-*Sidenote*: My particular use case while writing this script was crawling a bunch of web pages which were rendered almost entierly on client side using lots of javascript magic (thus saving output of `wget url` was useless). Since the browser is capable of rendering those pages, and also saving the post-render version on disk (using Ctrl+S), I wrote this script to automate the process (Tested on Ubuntu 12.04 and 14.04 myself).
+- `sudo apt-get install xdotool` (for Ubuntu).
+- `sudo yum install -y xdotool` (for EuroLinux/Enterprise Linux/Fedora).
 
 Suggestions and/or pull requests are always welcome!
